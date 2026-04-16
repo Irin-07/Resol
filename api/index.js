@@ -79,6 +79,7 @@ app.get('/api/data', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
 app.post('/api/save-signature', async (req, res) => {
     const { index, signature } = req.body;
     try {
@@ -97,13 +98,13 @@ app.post('/api/save-signature', async (req, res) => {
 
 app.post('/api/submit', async (req, res) => {
     try {
-        await saveData({ submitted: true });
+        // submit பண்ணினாலும் server-ல் submitted save பண்ண வேண்டாம்
+        // Frontend மட்டும் finalize ஆகும், refresh பண்ணா fresh start
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
-
 app.post('/api/reset', async (req, res) => {
     try {
         if (isUsingMongoDB) {
