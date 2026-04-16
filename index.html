@@ -644,12 +644,17 @@
       "S. Srirenganathan", "T. Krishnarajh", "T. Kumararasan", "S. Manimaran"
     ];
 
-    const signatures = {};
+    let signatures = JSON.parse(localStorage.getItem('savedSignatures')) || {};
     let activeIdx = null;
     let drawing = false, lx = 0, ly = 0;
-    let submitted = false;
+    let submitted = localStorage.getItem('resolutionSubmitted') === 'true';
 
-    window.addEventListener('load', buildTable);
+    window.addEventListener('load', () => {
+      buildTable();
+      if (submitted) {
+        applySubmittedState();
+      }
+    });
 
     function buildTable() {
       const tbody = document.getElementById('sigBody');
@@ -765,6 +770,7 @@
       const cv = document.getElementById('cv' + i);
       const data = cv.toDataURL('image/png');
       signatures[i] = data;
+      localStorage.setItem('savedSignatures', JSON.stringify(signatures));
 
       const sc = document.getElementById('sc' + i);
       sc.innerHTML = `
@@ -776,27 +782,41 @@
 
     function submitResolution() {
       submitted = true;
+      localStorage.setItem('resolutionSubmitted', 'true');
       if (activeIdx !== null) closePad(activeIdx);
+      applySubmittedState();
+    }
 
+    function applySubmittedState() {
       document.getElementById('page2').classList.add('submitted');
       names.forEach((_, i) => {
         const sc = document.getElementById('sc' + i);
-        if (!signatures[i]) sc.innerHTML = '';
+        if (!signatures[i]) {
+          sc.innerHTML = '';
+        } else {
+          sc.innerHTML = `
+            <img src="${signatures[i]}" class="sig-img" style="display:block;max-height:48px;max-width:100%;">`;
+        }
         sc.onclick = null;
         sc.style.cursor = 'default';
         sc.style.background = '#fff';
       });
 
       document.getElementById('submitArea').style.display = 'none';
+      document.getElementById('submittedBanner').style.display = 'block';
 
       const now = new Date();
       const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
         + ' ' + now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 
-      // document.getElementById('bannerDate').textContent = 'Submitted on: ' + dateStr;
-      document.getElementById('submittedBanner').style.display = 'block';
-
       document.getElementById('page2').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Optional: Add a function to reset the form for testing
+    function resetForm() {
+      localStorage.removeItem('savedSignatures');
+      localStorage.removeItem('resolutionSubmitted');
+      location.reload();
     }
   </script>
 </body>
