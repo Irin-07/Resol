@@ -644,20 +644,36 @@
       "S. Srirenganathan", "T. Krishnarajh", "T. Kumararasan", "S. Manimaran"
     ];
 
-    let signatures = JSON.parse(localStorage.getItem('savedSignatures')) || {};
+    let signatures = {};
     let activeIdx = null;
     let drawing = false, lx = 0, ly = 0;
-    let submitted = localStorage.getItem('resolutionSubmitted') === 'true';
+    let submitted = false;
 
-    window.addEventListener('load', () => {
-      buildTable();
-      if (submitted) {
-        applySubmittedState();
-      }
+    window.addEventListener('load', async () => {
+      await refreshData();
     });
+
+    async function refreshData() {
+      try {
+        const res = await fetch('/api/data');
+        const data = await res.json();
+        signatures = data.signatures || {};
+        submitted = data.submitted || false;
+        
+        buildTable();
+        if (submitted) {
+          applySubmittedState();
+        }
+      } catch (err) {
+        console.error("Error loading data:", err);
+        // Fallback to table build even if server fails
+        buildTable();
+      }
+    }
 
     function buildTable() {
       const tbody = document.getElementById('sigBody');
+      if (!tbody) return;
       tbody.innerHTML = '';
       names.forEach((name, i) => {
         const tr = document.createElement('tr');
@@ -686,7 +702,7 @@
               <canvas class="sig-pad-canvas" id="cv${i}" width="560" height="90"></canvas>
               <div class="sig-pad-btns">
                 <button class="sp-btn clr" onclick="clearPad(${i})">Clear</button>
-                <button class="sp-btn save" onclick="savePad(${i})">Save Signature</button>
+                <button class="sp-btn save" id="saveBtn${i}" onclick="savePad(${i})">Save Signature</button>
                 <button class="sp-btn" onclick="closePad(${i})">Cancel</button>
               </div>
             </div>
@@ -766,25 +782,57 @@
       cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
     }
 
-    function savePad(i) {
+    async function savePad(i) {
       const cv = document.getElementById('cv' + i);
       const data = cv.toDataURL('image/png');
-      signatures[i] = data;
-      localStorage.setItem('savedSignatures', JSON.stringify(signatures));
+      
+      const saveBtn = document.getElementById('saveBtn' + i);
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving...';
 
-      const sc = document.getElementById('sc' + i);
-      sc.innerHTML = `
-        <img src="${data}" class="sig-img" style="display:block;max-height:48px;max-width:100%;">
-        <span class="sig-edit-hint">✏️ edit</span>`;
-      sc.classList.add('signed');
-      closePad(i);
+      try {
+        const response = await fetch('/api/save-signature', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ index: i, signature: data })
+        });
+        
+        if (response.ok) {
+          signatures[i] = data;
+          const sc = document.getElementById('sc' + i);
+          sc.innerHTML = `
+            <img src="${data}" class="sig-img" style="display:block;max-height:48px;max-width:100%;">
+            <span class="sig-edit-hint">✏️ edit</span>`;
+          sc.classList.add('signed');
+          closePad(i);
+        } else {
+          alert("Failed to save to server. Check connection.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Server error. Could not sync signature.");
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Signature';
+      }
     }
 
-    function submitResolution() {
-      submitted = true;
-      localStorage.setItem('resolutionSubmitted', 'true');
-      if (activeIdx !== null) closePad(activeIdx);
-      applySubmittedState();
+    async function submitResolution() {
+      if (!confirm("Are you sure you want to finalize this resolution? No more signatures can be added.")) return;
+      
+      try {
+        const response = await fetch('/api/submit', { method: 'POST' });
+        if (response.ok) {
+          submitted = true;
+          if (activeIdx !== null) closePad(activeIdx);
+          applySubmittedState();
+        } else {
+          alert("Submission failed. Try again.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Connection error during submission.");
+      }
     }
 
     function applySubmittedState() {
@@ -804,10 +852,6 @@
 
       document.getElementById('submitArea').style.display = 'none';
       document.getElementById('submittedBanner').style.display = 'block';
-
-      const now = new Date();
-      const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
-        + ' ' + now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 
       document.getElementById('page2').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
