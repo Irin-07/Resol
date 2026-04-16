@@ -8,6 +8,14 @@ const app = express();
 app.use(express.json({ limit: '10mb' }));
 app.use(cors());
 
+// Serve static files (frontend)
+app.use(express.static(path.join(__dirname, '..')));
+
+// Specific route for the home page
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'index.html'));
+});
+
 // --- Persistence Configuration ---
 const MONGODB_URI = process.env.MONGODB_URI;
 const LOCAL_STORAGE_PATH = path.join(__dirname, '..', 'signatures.json');
@@ -76,6 +84,9 @@ app.post('/api/save-signature', async (req, res) => {
     const { index, signature } = req.body;
     try {
         const data = await loadData();
+        if (data.submitted) {
+            return res.status(403).json({ error: "Resolution is finalized. No more signatures can be added." });
+        }
         const signatures = data.signatures || {};
         signatures[index] = signature;
         await saveData({ signatures });

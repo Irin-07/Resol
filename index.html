@@ -323,38 +323,149 @@
 
     .submit-btn:hover {
       background: #2a2a9e;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(26, 26, 110, 0.3);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    /* ── Custom Modal ── */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-card {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      transform: scale(0.9);
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    .modal-icon {
+      font-size: 40pt;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    .modal-title {
+      font-size: 16pt;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #1a1a6e;
+    }
+
+    .modal-text {
+      font-size: 11pt;
+      line-height: 1.5;
+      color: #444;
+      margin-bottom: 25px;
+    }
+
+    .modal-btns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .modal-btn {
+      padding: 10px 24px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .modal-btn.confirm {
+      background: #1a1a6e;
+      color: #fff;
+    }
+
+    .modal-btn.confirm:hover {
+      background: #2a2a9e;
+    }
+
+    .modal-btn.cancel {
+      background: #f1f1f1;
+      color: #666;
+    }
+
+    .modal-btn.cancel:hover {
+      background: #e5e5e5;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes popIn {
+      to { transform: scale(1); }
     }
 
     /* ── Submitted banner ── */
     .submitted-banner {
       display: none;
-      margin-top: 20px;
-      border-radius: 5px;
-      padding: 14px 20px;
+      margin-top: 30px;
+
+    
+      border-radius: 8px;
+      padding: 20px;
       text-align: center;
+      animation: slideUp 0.5s ease-out;
+    }
+
+    .submitted-banner::before {
+      display: block;
+      font-weight: bold;
+      color: #1a1a6e;
+      font-size: 14pt;
+      margin-bottom: 8px;
     }
 
     .banner-date {
-      font-size: 10.5pt;
-      color: #333;
-      margin-bottom: 12px;
+      font-size: 11pt;
+      color: #555;
+      margin-bottom: 20px;
     }
 
     .banner-print-btn {
       font-family: "Times New Roman", Times, serif;
-      font-size: 11pt;
+      font-size: 12pt;
       font-weight: bold;
       background: #1a1a6e;
       color: #fff;
       border: none;
-      padding: 8px 32px;
+      padding: 12px 48px;
       cursor: pointer;
-      border-radius: 3px;
+      border-radius: 4px;
       letter-spacing: 0.5px;
+      transition: background 0.2s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
 
-    .banner-print-btn:hover {
-      background: #2a2a9e;
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
 
     /* Locked after submit */
@@ -422,6 +533,18 @@
         page-break-inside: avoid;
       }
 
+      .no-print {
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+      }
+
+      #page1 {
+        display: none !important;
+      }
+
       .page:last-child {
         page-break-after: avoid !important;
       }
@@ -487,7 +610,7 @@
 <body>
 
   <!-- ══════════ PAGE 1 ══════════ -->
-  <div class="page" id="page1">
+  <div class="page no-print" id="page1">
     <div class="page-border"></div>
 
     <div class="header">
@@ -625,16 +748,35 @@
 
     <!-- ══ SUBMIT BUTTON ══ -->
     <div class="submit-area" id="submitArea">
-      <button class="submit-btn" onclick="submitResolution()">SUBMIT RESOLUTION</button>
+      <button class="submit-btn" onclick="submitResolution()">FINALIZE RESOLUTION</button>
       <div style="margin-top: 15px;">
-        <button onclick="resetForm()" style="background: none; border: none; color: #888; font-size: 9pt; cursor: pointer; text-decoration: underline;">Reset All Signatures (Danger)</button>
+        <button onclick="resetForm()" style="background: none; border: none; color: #888; font-size: 9pt; cursor: pointer; text-decoration: underline;"></button>
+      </div>
+    </div>
+
+    <!-- ══ CUSTOM MODAL ══ -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal-card">
+        <span class="modal-icon">⚠️</span>
+        <div class="modal-title">Finalize Resolution?</div>
+        <div class="modal-text">
+          Are you sure you want to finalize this resolution? <br>
+          <strong>No more signatures can be added</strong> after this action.
+        </div>
+        <div class="modal-btns">
+          <button class="modal-btn cancel" onclick="hideFinalizeModal()">Cancel</button>
+          <button class="modal-btn confirm" id="confirmBtn" onclick="submitResolution()">Yes, Finalize</button>
+        </div>
       </div>
     </div>
 
     <!-- ══ SUBMITTED BANNER ══ -->
     <div class="submitted-banner" id="submittedBanner">
       <div class="banner-date" id="bannerDate"></div>
-      <button class="banner-print-btn" onclick="window.print()">🖨️ Print</button>
+      <div style="display: flex; gap: 15px; justify-content: center; align-items: center;">
+        <button class="banner-print-btn" onclick="window.print()">🖨️ Print</button>
+       
+      </div>
     </div>
 
     <div class="footer-bar">2/2</div>
@@ -654,26 +796,23 @@
 
     window.addEventListener('load', async () => {
       await refreshData();
+      if (!submitted) {
+        document.getElementById('sigTable').scrollIntoView({ behavior: 'smooth' });
+      }
     });
 
     async function refreshData() {
-      try {
-        const res = await fetch('/api/data');
-        const data = await res.json();
-        signatures = data.signatures || {};
-        submitted = data.submitted || false;
-        
-        buildTable();
-        if (submitted) {
-          applySubmittedState();
-        }
-      } catch (err) {
-        console.error("Error loading data:", err);
-        // Fallback to table build even if server fails
-        buildTable();
-      }
-    }
-
+  try {
+    const res = await fetch('/api/data');
+    const data = await res.json();
+    signatures = data.signatures || {};
+    submitted = false; // refresh-ல எப்பவும் fresh start
+    buildTable();
+  } catch (err) {
+    console.error("Error loading data:", err);
+    buildTable();
+  }
+}
     function buildTable() {
       const tbody = document.getElementById('sigBody');
       if (!tbody) return;
@@ -785,78 +924,76 @@
       cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
     }
 
-    async function savePad(i) {
-      const cv = document.getElementById('cv' + i);
-      const data = cv.toDataURL('image/png');
-      
-      const saveBtn = document.getElementById('saveBtn' + i);
-      saveBtn.disabled = true;
-      saveBtn.textContent = 'Saving...';
+  async function savePad(i) {
+  const cv = document.getElementById('cv' + i);
+  const data = cv.toDataURL('image/png');
 
-      try {
-        const response = await fetch('/api/save-signature', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ index: i, signature: data })
-        });
-        
-        if (response.ok) {
-          signatures[i] = data;
-          const sc = document.getElementById('sc' + i);
-          sc.innerHTML = `
-            <img src="${data}" class="sig-img" style="display:block;max-height:48px;max-width:100%;">
-            <span class="sig-edit-hint">✏️ edit</span>`;
-          sc.classList.add('signed');
-          closePad(i);
-        } else {
-          alert("Failed to save to server. Check connection.");
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Server error. Could not sync signature.");
-      } finally {
-        saveBtn.disabled = false;
-        saveBtn.textContent = 'Save Signature';
-      }
+  // உடனே UI-ல sign காட்டு
+  signatures[i] = data;
+  const sc = document.getElementById('sc' + i);
+  sc.innerHTML = `
+    <img src="${data}" class="sig-img" style="display:block;max-height:48px;max-width:100%;">
+    <span class="sig-edit-hint">✏️ edit</span>`;
+  sc.classList.add('signed');
+  closePad(i);
+
+  // Background-ல server-க்கு save — error வந்தாலும் student-க்கு தெரியாது
+  try {
+    await fetch('/api/save-signature', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ index: i, signature: data })
+    });
+  } catch (err) {
+    console.error("Server sync failed:", err);
+  }
+}
+async function submitResolution() {
+  if (activeIdx !== null) closePad(activeIdx);
+
+  submitted = true;
+
+  // Background-ல server-க்கு submit — error வந்தாலும் தொடரும்
+  try {
+    await fetch('/api/submit', { method: 'POST' });
+  } catch (err) {
+    console.error("Submit sync failed:", err);
+  }
+
+  applySubmittedState();
+}
+   function applySubmittedState() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  // document.getElementById('bannerDate').textContent = `Finalized on ${dateStr} at ${timeStr}`;
+
+  // page1 காட்டு (screen-ல மட்டும்)
+  const p1 = document.getElementById('page1');
+  p1.style.display = 'flex';
+
+  // Signatures fill ஆகு
+  names.forEach((_, i) => {
+    const sc = document.getElementById('sc' + i);
+    if (!signatures[i]) {
+      sc.innerHTML = '';
+    } else {
+      sc.innerHTML = `<img src="${signatures[i]}" class="sig-img" style="display:block;max-height:48px;max-width:100%;">`;
     }
+    sc.onclick = null;
+    sc.style.cursor = 'default';
+    sc.style.background = '#fff';
 
-    async function submitResolution() {
-      if (!confirm("Are you sure you want to finalize this resolution? No more signatures can be added.")) return;
-      
-      try {
-        const response = await fetch('/api/submit', { method: 'POST' });
-        if (response.ok) {
-          submitted = true;
-          if (activeIdx !== null) closePad(activeIdx);
-          applySubmittedState();
-        } else {
-          alert("Submission failed. Try again.");
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Connection error during submission.");
-      }
-    }
+    const pad = document.getElementById('pad' + i);
+    if (pad) pad.style.display = 'none';
+  });
 
-    function applySubmittedState() {
-      document.getElementById('page2').classList.add('submitted');
-      names.forEach((_, i) => {
-        const sc = document.getElementById('sc' + i);
-        if (!signatures[i]) {
-          sc.innerHTML = '';
-        } else {
-          sc.innerHTML = `
-            <img src="${signatures[i]}" class="sig-img" style="display:block;max-height:48px;max-width:100%;">`;
-        }
-        sc.onclick = null;
-        sc.style.cursor = 'default';
-        sc.style.background = '#fff';
-      });
+  document.getElementById('submitArea').style.display = 'none';
+  document.getElementById('submittedBanner').style.display = 'block';
 
-      document.getElementById('submitArea').style.display = 'none';
-      document.getElementById('submittedBanner').style.display = 'block';
-    }
-
+  // Page top-க்கு scroll பண்ணு
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
     async function resetForm() {
       if (!confirm("DANGER: This will delete ALL signatures and reset the whole form. Are you sure?")) return;
       
