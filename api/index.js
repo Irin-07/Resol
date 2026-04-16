@@ -99,6 +99,17 @@ app.get('/api/data', async (req, res) => {
     }
 });
 
+// API to fetch latest signatures (for page load)
+app.get('/api/signatures/latest', async (req, res) => {
+    try {
+        const data = await loadData();
+        res.json({ success: true, data: { signatures: data.signatures || {}, submitted: data.submitted || false } });
+    } catch (err) {
+        console.error('Error loading signatures:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // API to save an individual signature
 app.post('/api/save-signature', async (req, res) => {
     const { index, signature } = req.body;
