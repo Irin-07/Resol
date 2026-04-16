@@ -823,10 +823,9 @@
         signatures = data.signatures || {};
         submitted = !!data.submitted;
 
+        buildTable();
         if (submitted) {
           applySubmittedState();
-        } else {
-          buildTable();
         }
       } catch (err) {
         console.error("Error loading data:", err);
