@@ -118,6 +118,22 @@ app.post('/api/save-signature', async (req, res) => {
     }
 });
 
+// API to save all signatures (bulk save from frontend)
+app.post('/api/signatures', async (req, res) => {
+    const { signatures, date, shareholderData } = req.body;
+    if (!signatures) {
+        return res.status(400).json({ error: 'Missing signatures' });
+    }
+    try {
+        await saveData({ signatures, submitted: true });
+        console.log(`All signatures saved on ${date}`);
+        res.json({ success: true, storedInMongo: !!MONGODB_URI, signatures });
+    } catch (err) {
+        console.error('Error saving signatures:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // API to finalize/submit the resolution
 app.post('/api/submit', async (req, res) => {
     try {
