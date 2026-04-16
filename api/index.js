@@ -80,28 +80,19 @@ app.get('/api/data', async (req, res) => {
     }
 });
 // இதை மட்டும் வை (submitted check இல்லாம):
+// API to save an individual signature
 app.post('/api/save-signature', async (req, res) => {
     const { index, signature } = req.body;
     try {
         const data = await loadData();
         const signatures = data.signatures || {};
         signatures[index] = signature;
+        // Always reset submitted to false when a new signature is added to allow further editing
         await saveData({ signatures, submitted: false });
+        console.log(`Signature saved for index ${index}`);
         res.json({ success: true, signatures });
     } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-app.post('/api/save-signature', async (req, res) => {
-    const { index, signature } = req.body;
-    try {
-        const data = await loadData();
-        const signatures = data.signatures || {};
-        signatures[index] = signature;
-        // submitted: false — always allow signing
-        await saveData({ signatures, submitted: false });
-        res.json({ success: true, signatures });
-    } catch (err) {
+        console.error("Error saving signature:", err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -130,8 +121,7 @@ app.listen(PORT, async () => {
             console.log("Connected to MongoDB.");
         }
     } else {
-        const sigDir = path.join('C:', 'Resolution', 'signatures');
-        console.log(`Using signatures directory: ${sigDir}`);
+        console.log(`Using local storage file: ${LOCAL_STORAGE_PATH}`);
         console.log("MongoDB URI not configured. Using local file storage only.");
     }
 });
