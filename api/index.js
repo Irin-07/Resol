@@ -87,7 +87,21 @@ app.post('/api/save-signature', async (req, res) => {
 
 app.post('/api/submit', async (req, res) => {
     try {
-        await saveData({ submitted: true });
+        await saveData({ submitted: true, lastUpdated: new Date() });
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/reset', async (req, res) => {
+    try {
+        if (isUsingMongoDB) {
+            await Resolution.deleteMany({});
+        } else {
+            localData = { signatures: {}, submitted: false };
+            fs.writeFileSync(LOCAL_STORAGE_PATH, JSON.stringify(localData, null, 2));
+        }
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });

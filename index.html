@@ -626,6 +626,9 @@
     <!-- ══ SUBMIT BUTTON ══ -->
     <div class="submit-area" id="submitArea">
       <button class="submit-btn" onclick="submitResolution()">SUBMIT RESOLUTION</button>
+      <div style="margin-top: 15px;">
+        <button onclick="resetForm()" style="background: none; border: none; color: #888; font-size: 9pt; cursor: pointer; text-decoration: underline;">Reset All Signatures (Danger)</button>
+      </div>
     </div>
 
     <!-- ══ SUBMITTED BANNER ══ -->
@@ -852,16 +855,24 @@
 
       document.getElementById('submitArea').style.display = 'none';
       document.getElementById('submittedBanner').style.display = 'block';
-
-      document.getElementById('page2').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    // Optional: Add a function to reset the form for testing
-    function resetForm() {
-      localStorage.removeItem('savedSignatures');
-      localStorage.removeItem('resolutionSubmitted');
-      location.reload();
+    async function resetForm() {
+      if (!confirm("DANGER: This will delete ALL signatures and reset the whole form. Are you sure?")) return;
+      
+      try {
+        const response = await fetch('/api/reset', { method: 'POST' });
+        if (response.ok) {
+          location.reload();
+        } else {
+          alert("Reset failed.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Server error during reset.");
+      }
     }
+
   </script>
 </body>
 
