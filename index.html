@@ -750,7 +750,7 @@
     <div class="submit-area" id="submitArea">
       <button class="submit-btn" onclick="submitResolution()">FINALIZE RESOLUTION</button>
       <div style="margin-top: 15px;">
-        <button onclick="resetForm()" style="background: none; border: none; color: #888; font-size: 9pt; cursor: pointer; text-decoration: underline;"></button>
+        <button onclick="resetForm()" style="background: none; border: none; color: #d00; font-size: 9pt; cursor: pointer; text-decoration: underline;">Clear All Signatures (Admin Reset)</button>
       </div>
     </div>
 
@@ -795,24 +795,67 @@
     let submitted = false;
 
     window.addEventListener('load', async () => {
-      await refreshData();
+      await refreshData(true);
       if (!submitted) {
         document.getElementById('sigTable').scrollIntoView({ behavior: 'smooth' });
       }
+      
+      // Start polling every 5 seconds for other people's signatures
+      setInterval(() => refreshData(false), 5000);
     });
 
-    async function refreshData() {
-  try {
-    const res = await fetch('/api/data');
-    const data = await res.json();
-    signatures = data.signatures || {};
-    submitted = false; // refresh-ல எப்பவும் fresh start
-    buildTable();
-  } catch (err) {
-    console.error("Error loading data:", err);
-    buildTable();
-  }
-}
+    async function refreshData(isInitial = false) {
+      try {
+        const res = await fetch('/api/data');
+        const data = await res.json();
+        
+        const oldSignatures = JSON.stringify(signatures);
+        signatures = data.signatures || {};
+        
+        // Only apply submitted state if not already in that state
+        if (data.submitted && !submitted) {
+          submitted = true;
+          applySubmittedState();
+          return;
+        }
+
+        if (submitted) return;
+
+        // If data changed and no one is currently signing, rebuild the table
+        // Or if it's the first load
+        if (isInitial || (JSON.stringify(signatures) !== oldSignatures && activeIdx === null)) {
+          buildTable();
+        } else if (JSON.stringify(signatures) !== oldSignatures) {
+          // If someone is signing, just update the cells that aren't active
+          updateTableCells();
+        }
+      } catch (err) {
+        console.error("Error loading data:", err);
+        if (isInitial) buildTable();
+      }
+    }
+
+    function updateTableCells() {
+      names.forEach((name, i) => {
+        if (activeIdx === i) return; // Don't mess with the row the user is signing
+        
+        const sc = document.getElementById('sc' + i);
+        if (!sc) return;
+        
+        const hasSig = !!signatures[i];
+        const isSigned = sc.classList.contains('signed');
+        
+        if (hasSig) {
+          sc.innerHTML = `
+            <img src="${signatures[i]}" class="sig-img" style="display:block;max-height:48px;max-width:100%;">
+            <span class="sig-edit-hint">✏️ edit</span>`;
+          sc.classList.add('signed');
+        } else {
+          sc.innerHTML = `<span class="sig-ph">Click to sign</span><span class="sig-edit-hint">✏️</span>`;
+          sc.classList.remove('signed');
+        }
+      });
+    }
     function buildTable() {
       const tbody = document.getElementById('sigBody');
       if (!tbody) return;
