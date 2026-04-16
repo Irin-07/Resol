@@ -1,10 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shares Transfer Resolution - Mankatha (Pvt) Ltd</title>
+  <title>Shareholders Resolution - Mankatha (Pvt) Ltd</title>
   <style>
     * {
       margin: 0;
@@ -47,8 +48,8 @@
       display: flex;
       align-items: flex-start;
       border: 1.5px solid #000;
-      padding: 8px 14px;
-      margin-bottom: 8px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
       gap: 10px;
     }
 
@@ -96,14 +97,15 @@
     /* ── Body ── */
     .date-line {
       font-weight: bold;
-      margin-bottom: 8px;
+      margin-bottom: 14px;
       font-size: 11pt;
     }
 
     .res-title {
       font-weight: bold;
       font-size: 12pt;
-      margin-bottom: 8px;
+      text-decoration: underline;
+      margin-bottom: 14px;
     }
 
     .intro {
@@ -112,60 +114,43 @@
     }
 
     .sec {
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       font-size: 11pt;
     }
 
     .sec-head {
       font-weight: bold;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     .sec-body {
-      margin-left: 0px;
+      margin-left: 20px;
       line-height: 1.6;
     }
 
     .bullets {
-      list-style: disc;
+      list-style: none;
       margin-left: 40px;
       margin-top: 6px;
     }
 
     .bullets li {
-      margin-bottom: 5px;
-      font-weight: bold;
+      position: relative;
+      padding-left: 18px;
+      margin-bottom: 4px;
     }
 
-    .bullets li span {
-      font-weight: normal;
-      display: block;
-      margin-left: 0;
-    }
-
-    hr.sec-divider {
-      border: none;
-      border-top: 1.5px solid #000;
-      margin: 10px 0;
-    }
-
-    /* ── Certification ── */
-    .cert-title {
-      font-weight: bold;
-      margin-bottom: 6px;
-      font-size: 11pt;
-    }
-
-    .cert-intro {
-      margin-bottom: 10px;
-      font-size: 11pt;
+    .bullets li::before {
+      content: "o";
+      position: absolute;
+      left: 0;
     }
 
     /* ── Signature Table ── */
     table.sig-tbl {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 8px;
+      margin-top: 16px;
       font-size: 11pt;
     }
 
@@ -175,7 +160,6 @@
       text-align: center;
       font-weight: normal;
       font-size: 10pt;
-      background: #f5f5f5;
     }
 
     table.sig-tbl td {
@@ -189,7 +173,7 @@
     }
 
     table.sig-tbl td:nth-child(2) {
-      width: 55%;
+      width: 50%;
     }
 
     /* ── Signature cell ── */
@@ -302,7 +286,7 @@
       background: #e8e8e8;
     }
 
-    /* ── Submit ── */
+    /* ── Submit button ── */
     .submit-area {
       margin-top: 24px;
       text-align: center;
@@ -323,166 +307,55 @@
 
     .submit-btn:hover {
       background: #2a2a9e;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(26, 26, 110, 0.3);
-    }
-
-    .submit-btn:active {
-      transform: translateY(0);
-    }
-
-    /* ── Custom Modal ── */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(4px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .modal-card {
-      background: #fff;
-      padding: 30px;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 400px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-      text-align: center;
-      transform: scale(0.9);
-      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    }
-
-    .modal-icon {
-      font-size: 40pt;
-      margin-bottom: 20px;
-      display: block;
-    }
-
-    .modal-title {
-      font-size: 16pt;
-      font-weight: bold;
-      margin-bottom: 15px;
-      color: #1a1a6e;
-    }
-
-    .modal-text {
-      font-size: 11pt;
-      line-height: 1.5;
-      color: #444;
-      margin-bottom: 25px;
-    }
-
-    .modal-btns {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-    }
-
-    .modal-btn {
-      padding: 10px 24px;
-      border-radius: 6px;
-      font-family: inherit;
-      font-weight: bold;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s;
-    }
-
-    .modal-btn.confirm {
-      background: #1a1a6e;
-      color: #fff;
-    }
-
-    .modal-btn.confirm:hover {
-      background: #2a2a9e;
-    }
-
-    .modal-btn.cancel {
-      background: #f1f1f1;
-      color: #666;
-    }
-
-    .modal-btn.cancel:hover {
-      background: #e5e5e5;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-
-      to {
-        opacity: 1;
-      }
-    }
-
-    @keyframes popIn {
-      to {
-        transform: scale(1);
-      }
     }
 
     /* ── Submitted banner ── */
     .submitted-banner {
       display: none;
-      margin-top: 30px;
+      margin-top: 20px;
 
-
-      border-radius: 8px;
-      padding: 20px;
+      border-radius: 5px;
+    
+      padding: 14px 20px;
       text-align: center;
-      animation: slideUp 0.5s ease-out;
     }
 
-    .submitted-banner::before {
-      display: block;
+    .banner-check {
+      font-size: 22pt;
+      margin-bottom: 4px;
+    }
+
+    .banner-title {
+      font-size: 13pt;
       font-weight: bold;
-      color: #1a1a6e;
-      font-size: 14pt;
-      margin-bottom: 8px;
+   
+      margin-bottom: 4px;
     }
 
     .banner-date {
-      font-size: 11pt;
-      color: #555;
-      margin-bottom: 20px;
+      font-size: 10.5pt;
+      color: #333;
+      margin-bottom: 12px;
     }
 
     .banner-print-btn {
       font-family: "Times New Roman", Times, serif;
-      font-size: 12pt;
+      font-size: 11pt;
       font-weight: bold;
       background: #1a1a6e;
       color: #fff;
       border: none;
-      padding: 12px 48px;
+      padding: 8px 32px;
       cursor: pointer;
-      border-radius: 4px;
+      border-radius: 3px;
       letter-spacing: 0.5px;
-      transition: background 0.2s;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
-    @keyframes slideUp {
-      from {
-        transform: translateY(20px);
-        opacity: 0;
-      }
-
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
+    .banner-print-btn:hover {
+      background: #2a2a9e;
     }
 
-    /* Locked after submit */
+    /* ── Locked state after submit ── */
     .submitted .sig-cell {
       cursor: default !important;
       background: #fff !important;
@@ -509,11 +382,6 @@
       width: 100%;
     }
 
-    /* ── Page break between page 1 and page 2 ── */
-    .page+.page {
-      margin-top: 30px;
-    }
-
     /* ── PRINT ── */
     @media print {
       @page {
@@ -521,57 +389,59 @@
         size: A4;
       }
 
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-        overflow: visible !important;
-      }
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #fff !important;
+      width: 100%;
+      height: 100%;
+    }
 
-      body {
-        background: #fff;
-      }
+    body {
+      background: #fff;
+    }
 
-      .page {
-        box-shadow: none;
-        margin: 0 !important;
-        padding: 10mm 15mm;
-        width: 210mm;
-        height: 297mm;
-        border: none !important;
-        overflow: hidden;
-        position: relative;
-        display: flex !important;
-        flex-direction: column;
-        page-break-after: always;
-        page-break-inside: avoid;
-      }
+    .page {
+      box-shadow: none !important;
+      margin: 0 auto !important;
+      padding: 10mm 15mm !important;
+      width: 210mm !important;
+      height: 289mm !important; /* Aggressively reduced to stop blank page */
+      border: none !important;
+      overflow: visible !important;
+      position: relative;
+      display: flex !important;
+      flex-direction: column;
+      page-break-after: avoid !important;
+      page-break-before: avoid !important;
+      break-after: avoid !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
 
-      .no-print {
-        display: none !important;
-        height: 0 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow: hidden !important;
-      }
+    #page1 {
+      display: none !important;
+    }
 
-      #page1 {
-        display: none !important;
-      }
+    .page:last-child, .page#mainPage {
+      page-break-after: avoid !important;
+    }
 
-      .page:last-child {
-        page-break-after: avoid !important;
-      }
+    .page-border {
+      border: 2px solid #000 !important;
+      position: absolute;
+      top: 6mm;
+      left: 6mm;
+      right: 6mm;
+      bottom: 6mm;
+      z-index: 100;
+      pointer-events: none;
+    }
 
-      .page-border {
-        border: 2px solid #000 !important;
-        position: absolute;
-        top: 8mm;
-        left: 8mm;
-        right: 8mm;
-        bottom: 8mm;
-        z-index: 100;
-        pointer-events: none;
+      .sig-tbl {
+        margin-top: 10px;
+        margin-bottom: 5px;
+        /* Add space at bottom of table */
       }
 
       .sec {
@@ -579,11 +449,23 @@
       }
 
       .date-line {
-        margin-bottom: 12px;
+        margin-bottom: 8px;
       }
 
+      table.sig-tbl tr {
+        height: 38px !important; /* Fixed row height for consistency */
+      }
+      table.sig-tbl td {
+        height: 38px !important;
+        vertical-align: middle;
+      }
       .sig-cell {
         height: 35px !important;
+      }
+      .sig-img {
+        max-height: 32px !important; /* Ensure image fits inside the fixed row */
+        display: block;
+        margin: auto;
       }
 
       .submit-area {
@@ -607,6 +489,20 @@
         margin-bottom: 5px;
       }
 
+      .banner-check {
+        display: none;
+      }
+
+      .banner-title {
+        font-size: 11pt;
+        color: #000;
+      }
+
+      .banner-date {
+        font-size: 10pt;
+        color: #000;
+      }
+
       .banner-print-btn {
         display: none !important;
       }
@@ -618,19 +514,76 @@
         font-size: 9pt;
       }
     }
+
+    /* Page 1 is visible on screen but hidden on print. */
   </style>
 </head>
 
 <body>
 
-  <!-- ══════════ PAGE 1 ══════════ -->
-  <div class="page no-print" id="page1">
+  <div class="page" id="page1">
     <div class="page-border"></div>
-
     <div class="header">
       <div class="logo-box">
         <img src="assets/logo.png" alt="Mankatha Logo">
       </div>
+      <div class="header-center">
+        <div class="tamil">மங்காத்தா நிறுவனம்</div>
+        <div class="english"><strong>MANKATHA</strong> (PVT) <strong>LTD</strong></div>
+      </div>
+      <div class="addr">No.11 Modern market<br>Valvettiturai<br>Email: mankathavvt@gmail.com</div>
+    </div>
+
+    <div class="date-line">Date: 08.04.2026</div>
+
+    <div style="font-weight: bold; font-size: 11pt; margin-bottom: 14px;">ORDINARY RESOLUTION</div>
+    <div class="intro">It is hereby resolved that:</div>
+
+    <div class="sec">
+      <div style="font-weight: bold; margin-bottom: 8px;">1. Approval of Share Transfer</div>
+      <div class="sec-body" style="margin-left: 0;">The Company hereby approves the transfer of shares from the existing shareholders to the following new/existing shareholders as detailed below:
+        <ul style="list-style-type: disc; padding-left: 40px; margin-top: 12px; margin-bottom: 10px; line-height: 1.4;">
+          <li style="margin-bottom: 10px;"><strong>Mr. T. Gnanaraj &rarr; Mr. Balachandran Sivakanesh</strong><br>Number of Shares Transferred: 20</li>
+          <li style="margin-bottom: 10px;"><strong>Mr. S. Manimaran &rarr; Mr. Paramakurysamy Mohanraj</strong><br>Number of Shares Transferred: 20</li>
+          <li style="margin-bottom: 10px;"><strong>Mr. S. Lavatheepan &rarr; Mr. Sothilingam Krishnakumar</strong><br>Number of Shares Transferred: 20</li>
+          <li style="margin-bottom: 10px;"><strong>Mr. T. Gnanaraj &rarr; Mr. Karmegasundaram Vasanthan</strong><br>Number of Shares Transferred: 10</li>
+          <li style="margin-bottom: 10px;"><strong>Mr. S. Manimaran &rarr; Mr. Karmegasundaram Vasanthan</strong><br>Number of Shares Transferred: 10</li>
+        </ul>
+      </div>
+    </div>
+    
+    <hr style="border: none; border-top: 1px solid #aaa; margin: 15px 0;">
+
+    <div class="sec">
+      <div style="font-weight: bold; margin-bottom: 8px;">2. Terms of Transfer</div>
+      <div class="sec-body" style="margin-left: 0;">The above shares are transferred at a consideration of LKR price per share 5000.00 / total amount 100000.00, as mutually agreed between the parties.</div>
+    </div>
+    
+    <hr style="border: none; border-top: 1px solid #aaa; margin: 15px 0;">
+
+    <div class="sec">
+      <div style="font-weight: bold; margin-bottom: 8px;">3. Compliance with Articles of Association</div>
+      <div class="sec-body" style="margin-left: 0;">The above transfer is confirmed to be in accordance with the provisions of the Company's Articles of Association.</div>
+    </div>
+    
+    <hr style="border: none; border-top: 1px solid #aaa; margin: 15px 0;">
+
+    <div class="sec">
+      <div style="font-weight: bold; margin-bottom: 8px;">4. Update of Share Register</div>
+      <div class="sec-body" style="margin-left: 0;">The Directors are hereby authorized to update the Share Register of the Company to reflect the above transfer of shares.</div>
+    </div>
+    
+    <hr style="border: none; border-top: 1.5px solid #000; margin: 15px 0;">
+
+    <div class="footer-bar" style="margin-top: auto; text-align: center;">1/2</div>
+  </div>
+
+  <div class="page" id="mainPage">
+    <div class="page-border"></div>
+
+    <!-- ══ HEADER ══ -->
+    <div class="header">
+      <div class="logo-box"><img src="assets/logo.png" alt="Mankatha Logo"></div>
       <div class="header-center">
         <div class="tamil">மங்காத்தா நிறுவனம்</div>
         <div class="english"><strong>MANKATHA</strong> (PVT) <strong>LTD</strong></div>
@@ -644,108 +597,41 @@
 
     <div class="date-line">Date: 08.04.2026</div>
 
-    <div class="res-title">ORDINARY RESOLUTION</div>
-
+    <div style="font-weight: bold; font-size: 11pt; margin-bottom: 14px;">ORDINARY RESOLUTION</div>
     <div class="intro">It is hereby resolved that:</div>
 
     <div class="sec">
-      <div class="sec-head">1. &nbsp;&nbsp;Approval of Share Transfer</div>
-      <div class="sec-body">
-        The Company hereby approves the transfer of shares from the existing shareholders to the
-        following new/existing shareholders as detailed below:
-        <ul class="bullets">
-          <li>Mr. T. Gnanaraj → Mr. Balachandran Sivakanesh
-            <span>Number of Shares Transferred: 20</span>
-          </li>
-          <li>Mr. S. Manimaran → Mr. Paramakurysamy Mohanraj
-            <span>Number of Shares Transferred: 20</span>
-          </li>
-          <li>Mr. S. Lavatheepan → Mr. Sothilingam Krishnakumar
-            <span>Number of Shares Transferred: 20</span>
-          </li>
-          <li>Mr. T. Gnanaraj → Mr. Karmegasundaram Vasanthan
-            <span>Number of Shares Transferred: 10</span>
-          </li>
-          <li>Mr. S. Manimaran → Mr. Karmegasundaram Vasanthan
-            <span>Number of Shares Transferred: 10</span>
-          </li>
+      <div style="font-weight: bold; margin-bottom: 8px;">1. Approval of Share Transfer</div>
+      <div class="sec-body" style="margin-left: 0;">The Company hereby approves the transfer of shares from the existing shareholders to the following new/existing shareholders as detailed below:
+        <ul style="list-style-type: disc; padding-left: 40px; margin-top: 12px; margin-bottom: 10px; line-height: 1.4;">
+          <li style="margin-bottom: 10px;"><strong>Mr. T. Gnanaraj &rarr; Mr. Balachandran Sivakanesh</strong><br>Number of Shares Transferred: 20</li>
+          <li style="margin-bottom: 10px;"><strong>Mr. S. Manimaran &rarr; Mr. Paramakurysamy Mohanraj</strong><br>Number of Shares Transferred: 20</li>
+          <li style="margin-bottom: 10px;"><strong>Mr. S. Lavatheepan &rarr; Mr. Sothilingam Krishnakumar</strong><br>Number of Shares Transferred: 20</li>
+          <li style="margin-bottom: 10px;"><strong>Mr. T. Gnanaraj &rarr; Mr. Karmegasundaram Vasanthan</strong><br>Number of Shares Transferred: 10</li>
+          <li style="margin-bottom: 10px;"><strong>Mr. S. Manimaran &rarr; Mr. Karmegasundaram Vasanthan</strong><br>Number of Shares Transferred: 10</li>
         </ul>
       </div>
     </div>
-
-    <hr class="sec-divider">
-
-    <div class="sec">
-      <div class="sec-head">2. &nbsp;&nbsp;Terms of Transfer</div>
-      <div class="sec-body">
-        The above shares are transferred at a consideration of LKR price per share 5000.00 /
-        total amount 100000.00, as mutually agreed between the parties.
-      </div>
-    </div>
-
-    <hr class="sec-divider">
+    
+    <hr style="border: none; border-top: 1px solid #aaa; margin: 15px 0;">
 
     <div class="sec">
-      <div class="sec-head">3. &nbsp;&nbsp;Compliance with Articles of Association</div>
-      <div class="sec-body">
-        The above transfer is confirmed to be in accordance with the provisions of the Company's
-        Articles of Association.
-      </div>
+      <div style="font-weight: bold; margin-bottom: 8px;">2. Terms of Transfer</div>
+      <div class="sec-body" style="margin-left: 0;">The above shares are transferred at a consideration of LKR price per share 5000.00 / total amount 100000.00, as mutually agreed between the parties.</div>
     </div>
+    
+    <hr style="border: none; border-top: 1px solid #aaa; margin: 15px 0;">
 
     <div class="sec">
-      <div class="sec-head">4. &nbsp;&nbsp;Update of Share Register</div>
-      <div class="sec-body">
-        The Directors are hereby authorized to update the Share Register of the Company to reflect
-        the above transfer of shares.
-      </div>
+      <div style="font-weight: bold; margin-bottom: 8px;">3. Compliance with Articles of Association</div>
+      <div class="sec-body" style="margin-left: 0;">The above transfer is confirmed to be in accordance with the provisions of the Company's Articles of Association.</div>
     </div>
-
-    <hr class="sec-divider">
+    
+    <hr style="border: none; border-top: 1px solid #aaa; margin: 15px 0;">
 
     <div class="sec">
-      <div class="sec-head">5. &nbsp;&nbsp;Filing with Registrar of Companies</div>
-      <div class="sec-body">
-        The Company Secretary / Director is authorized to make all necessary filings (if applicable)
-        with the Registrar of Companies of Sri Lanka.
-      </div>
-    </div>
-
-    <hr class="sec-divider">
-
-    <div class="sec">
-      <div class="sec-head">6. &nbsp;&nbsp;Issue of Share Certificates</div>
-      <div class="sec-body">
-        The Company is authorized to issue new Share Certificates to the transferees and cancel the
-        existing certificates held by the transferors, where applicable.
-      </div>
-    </div>
-
-    <div class="footer-bar">1/2</div>
-  </div>
-
-  <!-- ══════════ PAGE 2 ══════════ -->
-  <div class="page" id="page2">
-    <div class="page-border"></div>
-
-    <div class="header">
-      <div class="logo-box">
-        <img src="assets/logo.png" alt="Mankatha Logo">
-      </div>
-      <div class="header-center">
-        <div class="tamil">மங்காத்தா நிறுவனம்</div>
-        <div class="english"><strong>MANKATHA</strong> (PVT) <strong>LTD</strong></div>
-      </div>
-      <div class="addr">
-        No.11 Modern market<br>
-        Valvettiturai<br>
-        Email: mankathavvt@gmail.com
-      </div>
-    </div>
-
-    <div class="cert-title" style="margin-top: 10px;">CERTIFICATION</div>
-    <div class="cert-intro">
-      We, the undersigned, being the shareholders of the Company, hereby approve the above resolution:
+      <div style="font-weight: bold; margin-bottom: 8px;">4. Update of Share Register</div>
+      <div class="sec-body" style="margin-left: 0;">The Directors are hereby authorized to update the Share Register of the Company to reflect the above transfer of shares.</div>
     </div>
 
     <!-- ══ SIGNATURE TABLE ══ -->
@@ -762,39 +648,16 @@
 
     <!-- ══ SUBMIT BUTTON ══ -->
     <div class="submit-area" id="submitArea">
-      <button class="submit-btn" onclick="submitResolution()">FINALIZE RESOLUTION</button>
-      <div style="margin-top: 15px;">
-        <button onclick="resetForm()"
-          style="background: none; border: none; color: #888; font-size: 9pt; cursor: pointer; text-decoration: underline;"></button>
-      </div>
-    </div>
-
-    <!-- ══ CUSTOM MODAL ══ -->
-    <div class="modal-overlay" id="modalOverlay">
-      <div class="modal-card">
-        <span class="modal-icon">⚠️</span>
-        <div class="modal-title">Finalize Resolution?</div>
-        <div class="modal-text">
-          Are you sure you want to finalize this resolution? <br>
-          <strong>No more signatures can be added</strong> after this action.
-        </div>
-        <div class="modal-btns">
-          <button class="modal-btn cancel" onclick="hideFinalizeModal()">Cancel</button>
-          <button class="modal-btn confirm" id="confirmBtn" onclick="submitResolution()">Yes, Finalize</button>
-        </div>
-      </div>
+      <button class="submit-btn" onclick="submitResolution()">SUBMIT RESOLUTION</button>
     </div>
 
     <!-- ══ SUBMITTED BANNER ══ -->
     <div class="submitted-banner" id="submittedBanner">
       <div class="banner-date" id="bannerDate"></div>
-      <div style="display: flex; gap: 15px; justify-content: center; align-items: center;">
-        <button class="banner-print-btn" onclick="window.print()">🖨️ Print</button>
-
-      </div>
+      <button class="banner-print-btn" onclick="window.print()">🖨️ Print</button>
     </div>
 
-    <div class="footer-bar">2/2</div>
+
   </div>
 
   <script>
@@ -804,70 +667,66 @@
       "S. Srirenganathan", "T. Krishnarajh", "T. Kumararasan", "S. Manimaran"
     ];
 
-    let signatures = {};
+    const signatures = {};
     let activeIdx = null;
     let drawing = false, lx = 0, ly = 0;
     let submitted = false;
 
-    window.addEventListener('load', async () => {
-      await refreshData();
-      if (!submitted) {
-        document.getElementById('sigTable').scrollIntoView({ behavior: 'smooth' });
-      }
+    window.addEventListener('load', () => {
+      fetchLatestSignatures();
     });
 
-    async function refreshData() {
+    async function fetchLatestSignatures() {
       try {
-        const res = await fetch('/api/data');
-        const data = await res.json();
-        signatures = data.signatures || {};
-        submitted = !!data.submitted;
-
-        buildTable();
-        if (submitted) {
-          applySubmittedState();
+        const response = await fetch('/api/signatures/latest');
+        const result = await response.json();
+        if (result.success && result.data && result.data.signatures) {
+          Object.assign(signatures, result.data.signatures);
+          console.log("Loaded existing signatures:", signatures);
         }
       } catch (err) {
-        console.error("Error loading data:", err);
-        buildTable();
+        console.warn("Could not load existing signatures:", err);
       }
+      buildTable();
     }
+
     function buildTable() {
       const tbody = document.getElementById('sigBody');
-      if (!tbody) return;
       tbody.innerHTML = '';
       names.forEach((name, i) => {
+        // Signature display row
         const tr = document.createElement('tr');
         tr.id = 'row' + i;
         const hasSig = !!signatures[i];
         tr.innerHTML = `
-          <td>${i + 1}</td>
-          <td>${name}</td>
-          <td>
-            <div class="sig-cell${hasSig ? ' signed' : ''}" id="sc${i}" onclick="togglePad(${i})">
-              ${hasSig
+      <td>${i + 1}</td>
+      <td>${name}</td>
+      <td>
+        <div class="sig-cell${hasSig ? ' signed' : ''}" id="sc${i}" onclick="togglePad(${i})">
+          ${hasSig
             ? `<img src="${signatures[i]}" class="sig-img" style="display:block;max-height:48px;max-width:100%;">`
             : `<span class="sig-ph">Click to sign</span>`}
-              <span class="sig-edit-hint">${hasSig ? '✏️ edit' : '✏️'}</span>
-            </div>
-          </td>`;
+          <span class="sig-edit-hint">${hasSig ? '✏️ edit' : '✏️'}</span>
+        </div>
+      </td>`;
         tbody.appendChild(tr);
 
+        // Inline pad row
         const padTr = document.createElement('tr');
         padTr.id = 'pad' + i;
         padTr.className = 'sig-pad-row';
         padTr.innerHTML = `
-          <td colspan="3">
-            <div class="sig-pad-wrap">
-              <span class="sig-pad-label">✍️ Sign below — <strong>${name}</strong></span>
-              <canvas class="sig-pad-canvas" id="cv${i}" width="560" height="90"></canvas>
-              <div class="sig-pad-btns">
-                <button class="sp-btn clr" onclick="clearPad(${i})">Clear</button>
-                <button class="sp-btn save" id="saveBtn${i}" onclick="savePad(${i})">Save Signature</button>
-                <button class="sp-btn" onclick="closePad(${i})">Cancel</button>
-              </div>
-            </div>
-          </td>`;
+      <td colspan="3">
+        <div class="sig-pad-wrap">
+          <span class="sig-pad-label">✍️ Sign below — <strong>${name}</strong></span>
+          <canvas class="sig-pad-canvas" id="cv${i}" width="560" height="90"></canvas>
+          <div class="sig-pad-btns">
+            <button class="sp-btn clr" onclick="clearPad(${i})">Clear</button>
+            <button class="sp-btn save" onclick="savePad(${i})">Save Signature</button>
+            <button class="sp-btn" onclick="closePad(${i})">Cancel</button>
+          </div>
+        </div>
+      </td>`;
         tbody.appendChild(padTr);
       });
     }
@@ -943,92 +802,93 @@
       cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
     }
 
-    async function savePad(i) {
-      const cv = document.getElementById('cv' + i);
-      const data = cv.toDataURL('image/png');
-
-      // உடனே UI-ல sign காட்டு
-      signatures[i] = data;
-      const sc = document.getElementById('sc' + i);
-      sc.innerHTML = `
-    <img src="${data}" class="sig-img" style="display:block;max-height:48px;max-width:100%;">
-    <span class="sig-edit-hint">✏️ edit</span>`;
-      sc.classList.add('signed');
-      closePad(i);
-
-      // Background-ல server-க்கு save — error வந்தாலும் student-க்கு தெரியாது
-      try {
-        await fetch('/api/save-signature', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ index: i, signature: data })
-        });
-      } catch (err) {
-        console.error("Server sync failed:", err);
+    function isCanvasEmpty(cv) {
+      const ctx = cv.getContext('2d');
+      const pixelData = ctx.getImageData(0, 0, cv.width, cv.height).data;
+      for (let i = 0; i < pixelData.length; i += 4) {
+        if (pixelData[i+3] > 0) return false; // Any non-transparent pixel
       }
+      return true;
     }
-    async function submitResolution() {
+
+    function savePad(i) {
+      const cv = document.getElementById('cv' + i);
+      const sc = document.getElementById('sc' + i);
+      
+      if (isCanvasEmpty(cv)) {
+        // If empty, delete the signature
+        delete signatures[i];
+        sc.innerHTML = `<span class="sig-ph">Click to sign</span><span class="sig-edit-hint">✏️</span>`;
+        sc.classList.remove('signed');
+      } else {
+        // If has drawing, save it
+        const data = cv.toDataURL('image/png');
+        signatures[i] = data;
+        sc.innerHTML = `
+          <img src="${data}" class="sig-img" style="display:block;max-height:48px;max-width:100%;">
+          <span class="sig-edit-hint">✏️ edit</span>`;
+        sc.classList.add('signed');
+      }
+      closePad(i);
+    }
+
+    function submitResolution() {
+      submitted = true;
       if (activeIdx !== null) closePad(activeIdx);
 
-      submitted = true;
-
-      // Background-ல server-க்கு submit — error வந்தாலும் தொடரும்
-      try {
-        await fetch('/api/submit', { method: 'POST' });
-      } catch (err) {
-        console.error("Submit sync failed:", err);
-      }
-
-      applySubmittedState();
-    }
-    function applySubmittedState() {
-      const now = new Date();
-      const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-      const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-      // document.getElementById('bannerDate').textContent = `Finalized on ${dateStr} at ${timeStr}`;
-
-      // page1 காட்டு (screen-ல மட்டும்)
-      const p1 = document.getElementById('page1');
-      p1.style.display = 'flex';
-
-      // Signatures fill ஆகு
+      // Lock all cells
+      document.getElementById('mainPage').classList.add('submitted');
       names.forEach((_, i) => {
         const sc = document.getElementById('sc' + i);
-        if (!signatures[i]) {
-          sc.innerHTML = '';
-        } else {
-          sc.innerHTML = `<img src="${signatures[i]}" class="sig-img" style="display:block;max-height:48px;max-width:100%;">`;
-        }
+        if (!signatures[i]) sc.innerHTML = '';
         sc.onclick = null;
         sc.style.cursor = 'default';
         sc.style.background = '#fff';
-
-        const pad = document.getElementById('pad' + i);
-        if (pad) pad.style.display = 'none';
       });
 
+      // Hide submit button
       document.getElementById('submitArea').style.display = 'none';
+
+      // Show banner with date + print button
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
+        + ' ' + now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      // Send signatures to backend
+      const payload = {
+        signatures: signatures,
+        date: dateStr,
+        shareholderData: names.map((name, i) => ({
+          id: i + 1,
+          name: name,
+          signed: !!signatures[i]
+        }))
+      };
+
+      console.log("Saving signatures to backend...", payload);
+
+      fetch('/api/signatures', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log("Success:", data);
+          if (data.storedInMongo) {
+            console.log("Successfully stored in MongoDB");
+          } else {
+            console.warn("Stored in local file system only (MongoDB connection unavailable)");
+          }
+        })
+        .catch(error => {
+          console.error("Error saving signatures:", error);
+        });
+
+
       document.getElementById('submittedBanner').style.display = 'block';
 
-      // Page top-க்கு scroll பண்ணு
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.getElementById('mainPage').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-    async function resetForm() {
-      if (!confirm("DANGER: This will delete ALL signatures and reset the whole form. Are you sure?")) return;
-
-      try {
-        const response = await fetch('/api/reset', { method: 'POST' });
-        if (response.ok) {
-          location.reload();
-        } else {
-          alert("Reset failed.");
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Server error during reset.");
-      }
-    }
-
   </script>
 </body>
 
