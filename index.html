@@ -802,21 +802,17 @@
     });
 
     async function refreshData() {
-      try {
-        const res = await fetch('/api/data');
-        const data = await res.json();
-        signatures = data.signatures || {};
-        submitted = !!data.submitted;
-        
-        buildTable();
-        if (submitted) {
-          applySubmittedState();
-        }
-      } catch (err) {
-        console.error("Error loading data:", err);
-        buildTable();
-      }
-    }
+  try {
+    const res = await fetch('/api/data');
+    const data = await res.json();
+    signatures = data.signatures || {};
+    submitted = false; // refresh-ல எப்பவும் fresh start
+    buildTable();
+  } catch (err) {
+    console.error("Error loading data:", err);
+    buildTable();
+  }
+}
     function buildTable() {
       const tbody = document.getElementById('sigBody');
       if (!tbody) return;

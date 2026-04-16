@@ -83,32 +83,30 @@ app.post('/api/save-signature', async (req, res) => {
     const { index, signature } = req.body;
     try {
         const data = await loadData();
-        const signatures = data.signatures || {};
-        
-        // If signature is empty or null, remove it
-        if (!signature || signature.length < 100) { // Very small string probably means empty canvas
-            delete signatures[index];
-        } else {
-            signatures[index] = signature;
+        if (data.submitted) {
+            return res.status(403).json({ error: "Resolution is finalized. No more signatures can be added." });
         }
-
-        // We allow editing even if submitted, or we can auto-unsubmit
-        await saveData({ signatures, submitted: false }); 
+        const signatures = data.signatures || {};
+        signatures[index] = signature;
+        await saveData({ signatures });
         res.json({ success: true, signatures });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
-
-app.post('/api/submit', async (req, res) => {
+app.post('/api/save-signature', async (req, res) => {
+    const { index, signature } = req.body;
     try {
-        await saveData({ submitted: true });
-        res.json({ success: true });
+        const data = await loadData();
+        const signatures = data.signatures || {};
+        signatures[index] = signature;
+        // submitted: false — always allow signing
+        await saveData({ signatures, submitted: false });
+        res.json({ success: true, signatures });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
-
 app.post('/api/reset', async (req, res) => {
     try {
         if (isUsingMongoDB) {
