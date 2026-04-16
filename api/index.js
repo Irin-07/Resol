@@ -19,41 +19,8 @@ app.get('/', (req, res) => {
 // --- Persistence Configuration ---
 const MONGODB_URI = process.env.MONGODB_URI;
 const LOCAL_STORAGE_PATH = path.join(__dirname, '..', 'signatures.json');
-let isUsingMongoDB = false;
 
-// Shared data structure
-let localData = { signatures: {}, submitted: false };
-
-// --- Storage Logic ---
-const loadData = async () => {
-    if (isUsingMongoDB) {
-        let data = await Resolution.findOne();
-        if (!data) data = await Resolution.create({ signatures: {}, submitted: false });
-        return data;
-    } else {
-        if (fs.existsSync(LOCAL_STORAGE_PATH)) {
-            const raw = fs.readFileSync(LOCAL_STORAGE_PATH);
-            localData = JSON.parse(raw);
-        }
-        return localData;
-    }
-};
-
-const saveData = async (update) => {
-    if (isUsingMongoDB) {
-        let data = await Resolution.findOne();
-        if (!data) data = new Resolution();
-        Object.assign(data, update);
-        data.markModified('signatures');
-        await data.save();
-    } else {
-        Object.assign(localData, update);
-        localData.lastUpdated = new Date();
-        fs.writeFileSync(LOCAL_STORAGE_PATH, JSON.stringify(localData, null, 2));
-    }
-};
-
-// --- MongoDB Setup ---
+// --- MongoDB Schema ---
 const ResolutionSchema = new mongoose.Schema({
     signatures: { type: Object, default: {} },
     submitted: { type: Boolean, default: false },
@@ -61,13 +28,63 @@ const ResolutionSchema = new mongoose.Schema({
 });
 const Resolution = mongoose.models.Resolution || mongoose.model('Resolution', ResolutionSchema);
 
+// --- MongoDB Connection (serverless-safe: reuse existing connection) ---
+let isConnected = false;
 const connectDB = async () => {
-    if (isUsingMongoDB || !MONGODB_URI) return;
+    if (isConnected && mongoose.connection.readyState === 1) return;
+    if (!MONGODB_URI) return;
     try {
-        await mongoose.connect(MONGODB_URI);
-        isUsingMongoDB = true;
+        await mongoose.connect(MONGODB_URI, {
+            bufferCommands: false,
+        });
+        isConnected = true;
+        console.log('Connected to MongoDB.');
     } catch (err) {
-        console.error("MongoDB failed, staying on local storage.");
+        isConnected = false;
+        console.error('MongoDB connection failed:', err.message);
+        throw err;
+    }
+};
+
+// --- Storage Logic ---
+const loadData = async () => {
+    if (MONGODB_URI) {
+        await connectDB();
+        let data = await Resolution.findOne().lean();
+        if (!data) {
+            data = await Resolution.create({ signatures: {}, submitted: false });
+            data = data.toObject();
+        }
+        return data;
+    } else {
+        // Local file fallback (only works in non-serverless environments)
+        if (fs.existsSync(LOCAL_STORAGE_PATH)) {
+            const raw = fs.readFileSync(LOCAL_STORAGE_PATH, 'utf-8');
+            return JSON.parse(raw);
+        }
+        return { signatures: {}, submitted: false };
+    }
+};
+
+const saveData = async (update) => {
+    if (MONGODB_URI) {
+        await connectDB();
+        let data = await Resolution.findOne();
+        if (!data) data = new Resolution({ signatures: {}, submitted: false });
+        Object.assign(data, update);
+        data.lastUpdated = new Date();
+        data.markModified('signatures');
+        await data.save();
+    } else {
+        // Local file fallback
+        let current = { signatures: {}, submitted: false };
+        if (fs.existsSync(LOCAL_STORAGE_PATH)) {
+            const raw = fs.readFileSync(LOCAL_STORAGE_PATH, 'utf-8');
+            current = JSON.parse(raw);
+        }
+        Object.assign(current, update);
+        current.lastUpdated = new Date();
+        fs.writeFileSync(LOCAL_STORAGE_PATH, JSON.stringify(current, null, 2));
     }
 };
 
@@ -77,23 +94,26 @@ app.get('/api/data', async (req, res) => {
         const data = await loadData();
         res.json(data);
     } catch (err) {
+        console.error('Error loading data:', err);
         res.status(500).json({ error: err.message });
     }
 });
-// இதை மட்டும் வை (submitted check இல்லாம):
+
 // API to save an individual signature
 app.post('/api/save-signature', async (req, res) => {
     const { index, signature } = req.body;
+    if (index === undefined || !signature) {
+        return res.status(400).json({ error: 'Missing index or signature' });
+    }
     try {
         const data = await loadData();
         const signatures = data.signatures || {};
         signatures[index] = signature;
-        // Always reset submitted to false when a new signature is added to allow further editing
         await saveData({ signatures, submitted: false });
         console.log(`Signature saved for index ${index}`);
         res.json({ success: true, signatures });
     } catch (err) {
-        console.error("Error saving signature:", err);
+        console.error('Error saving signature:', err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -102,41 +122,40 @@ app.post('/api/save-signature', async (req, res) => {
 app.post('/api/submit', async (req, res) => {
     try {
         await saveData({ submitted: true });
-        console.log("Resolution finalized");
+        console.log('Resolution finalized');
         res.json({ success: true });
     } catch (err) {
-        console.error("Error finalizing resolution:", err);
-        res.status(500).json({ error: err.message });
-    }
-});
-app.post('/api/reset', async (req, res) => {
-    try {
-        if (isUsingMongoDB) {
-            await Resolution.deleteMany({});
-        } else {
-            localData = { signatures: {}, submitted: false };
-            fs.writeFileSync(LOCAL_STORAGE_PATH, JSON.stringify(localData, null, 2));
-        }
-        res.json({ success: true });
-    } catch (err) {
+        console.error('Error finalizing resolution:', err);
         res.status(500).json({ error: err.message });
     }
 });
 
-// --- Startup ---
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, async () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-    
-    if (MONGODB_URI) {
-        await connectDB();
-        if (isUsingMongoDB) {
-            console.log("Connected to MongoDB.");
+// API to reset all signatures
+app.post('/api/reset', async (req, res) => {
+    try {
+        if (MONGODB_URI) {
+            await connectDB();
+            await Resolution.deleteMany({});
+        } else {
+            const reset = { signatures: {}, submitted: false, lastUpdated: new Date() };
+            fs.writeFileSync(LOCAL_STORAGE_PATH, JSON.stringify(reset, null, 2));
         }
-    } else {
-        console.log(`Using local storage file: ${LOCAL_STORAGE_PATH}`);
-        console.log("MongoDB URI not configured. Using local file storage only.");
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error resetting:', err);
+        res.status(500).json({ error: err.message });
     }
 });
+
+// --- Startup (only for local dev, not Vercel) ---
+if (process.env.NODE_ENV !== 'production') {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+        console.log(`Server running on http://localhost:${PORT}`);
+        if (!MONGODB_URI) {
+            console.log(`No MONGODB_URI set. Using local file: ${LOCAL_STORAGE_PATH}`);
+        }
+    });
+}
 
 module.exports = app;
