@@ -802,36 +802,17 @@
     });
 
     async function refreshData() {
-      try {
-        const res = await fetch('/api/data');
-        const data = await res.json();
-        
-        // Update signatures
-        signatures = data.signatures || {};
-        
-        // If server says submitted, and we haven't applied it yet, apply it.
-        // If we are already submitted, just keep it.
-        const wasSubmitted = submitted;
-        submitted = data.submitted || false;
-        
-        if (submitted) {
-          applySubmittedState();
-        } else {
-          buildTable();
-          // If it was reset on server but we thought it was submitted, we might need to show buttons again.
-          if (wasSubmitted && !submitted) {
-            document.getElementById('submitArea').style.display = 'block';
-            document.getElementById('submittedBanner').style.display = 'none';
-          }
-        }
-      } catch (err) {
-        console.error("Error loading data:", err);
-        if (!submitted) buildTable();
-      }
-    }
-
-    // Poll for updates every 5 seconds so students see each other's signs
-    setInterval(refreshData, 5000);
+  try {
+    const res = await fetch('/api/data');
+    const data = await res.json();
+    signatures = data.signatures || {};
+    submitted = false; // refresh-ல எப்பவும் fresh start
+    buildTable();
+  } catch (err) {
+    console.error("Error loading data:", err);
+    buildTable();
+  }
+}
     function buildTable() {
       const tbody = document.getElementById('sigBody');
       if (!tbody) return;
@@ -943,93 +924,76 @@
       cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
     }
 
-    function isCanvasEmpty(cv) {
-      const ctx = cv.getContext('2d');
-      const pixelData = ctx.getImageData(0, 0, cv.width, cv.height).data;
-      for (let i = 0; i < pixelData.length; i += 4) {
-        if (pixelData[i+3] > 0) return false;
-      }
-      return true;
-    }
+  async function savePad(i) {
+  const cv = document.getElementById('cv' + i);
+  const data = cv.toDataURL('image/png');
 
-    async function savePad(i) {
-      const cv = document.getElementById('cv' + i);
-      const sc = document.getElementById('sc' + i);
-      let data = null;
+  // உடனே UI-ல sign காட்டு
+  signatures[i] = data;
+  const sc = document.getElementById('sc' + i);
+  sc.innerHTML = `
+    <img src="${data}" class="sig-img" style="display:block;max-height:48px;max-width:100%;">
+    <span class="sig-edit-hint">✏️ edit</span>`;
+  sc.classList.add('signed');
+  closePad(i);
 
-      if (isCanvasEmpty(cv)) {
-        // If empty, delete the signature
-        delete signatures[i];
-        sc.innerHTML = `<span class="sig-ph">Click to sign</span><span class="sig-edit-hint">✏️</span>`;
-        sc.classList.remove('signed');
-      } else {
-        // If has drawing, save it
-        data = cv.toDataURL('image/png');
-        signatures[i] = data;
-        sc.innerHTML = `
-          <img src="${data}" class="sig-img" style="display:block;max-height:48px;max-width:100%;">
-          <span class="sig-edit-hint">✏️ edit</span>`;
-        sc.classList.add('signed');
-      }
-      closePad(i);
-
-      try {
-        await fetch('/api/save-signature', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ index: i, signature: data })
-        });
-      } catch (err) {
-        console.error("Server sync failed:", err);
-      }
-    }
-
-  async function submitResolution() {
-    if (activeIdx !== null) closePad(activeIdx);
-    
-    try {
-      const res = await fetch('/api/submit', { method: 'POST' });
-      if (res.ok) {
-        submitted = true;
-        applySubmittedState();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        const errorData = await res.json();
-        alert("Submission failed: " + (errorData.error || "Unknown error"));
-      }
-    } catch (err) {
-      console.error("Submit sync failed:", err);
-      alert("Server error during submission.");
-    }
-  }
-
-  function applySubmittedState() {
-    const p1 = document.getElementById('page1');
-    if (p1) p1.style.display = 'flex';
-
-    names.forEach((_, i) => {
-      const sc = document.getElementById('sc' + i);
-      if (sc) {
-        if (!signatures[i]) {
-          sc.innerHTML = '';
-        } else {
-          sc.innerHTML = `<img src="${signatures[i]}" class="sig-img" style="display:block;max-height:48px;max-width:100%;">`;
-        }
-        sc.onclick = null;
-        sc.style.cursor = 'default';
-        sc.style.background = '#fff';
-      }
-
-      const pad = document.getElementById('pad' + i);
-      if (pad) pad.style.display = 'none';
+  // Background-ல server-க்கு save — error வந்தாலும் student-க்கு தெரியாது
+  try {
+    await fetch('/api/save-signature', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ index: i, signature: data })
     });
-
-    const submitArea = document.getElementById('submitArea');
-    if (submitArea) submitArea.style.display = 'none';
-    
-    const banner = document.getElementById('submittedBanner');
-    if (banner) banner.style.display = 'block';
+  } catch (err) {
+    console.error("Server sync failed:", err);
   }
+}
+async function submitResolution() {
+  if (activeIdx !== null) closePad(activeIdx);
+
+  submitted = true;
+
+  // Background-ல server-க்கு submit — error வந்தாலும் தொடரும்
+  try {
+    await fetch('/api/submit', { method: 'POST' });
+  } catch (err) {
+    console.error("Submit sync failed:", err);
+  }
+
+  applySubmittedState();
+}
+   function applySubmittedState() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  // document.getElementById('bannerDate').textContent = `Finalized on ${dateStr} at ${timeStr}`;
+
+  // page1 காட்டு (screen-ல மட்டும்)
+  const p1 = document.getElementById('page1');
+  p1.style.display = 'flex';
+
+  // Signatures fill ஆகு
+  names.forEach((_, i) => {
+    const sc = document.getElementById('sc' + i);
+    if (!signatures[i]) {
+      sc.innerHTML = '';
+    } else {
+      sc.innerHTML = `<img src="${signatures[i]}" class="sig-img" style="display:block;max-height:48px;max-width:100%;">`;
+    }
+    sc.onclick = null;
+    sc.style.cursor = 'default';
+    sc.style.background = '#fff';
+
+    const pad = document.getElementById('pad' + i);
+    if (pad) pad.style.display = 'none';
+  });
+
+  document.getElementById('submitArea').style.display = 'none';
+  document.getElementById('submittedBanner').style.display = 'block';
+
+  // Page top-க்கு scroll பண்ணு
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
     async function resetForm() {
       if (!confirm("DANGER: This will delete ALL signatures and reset the whole form. Are you sure?")) return;
       

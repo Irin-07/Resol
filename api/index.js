@@ -79,28 +79,28 @@ app.get('/api/data', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-
+// இதை மட்டும் வை (submitted check இல்லாம):
 app.post('/api/save-signature', async (req, res) => {
     const { index, signature } = req.body;
     try {
         const data = await loadData();
-        if (data.submitted) {
-            return res.status(403).json({ error: "Resolution is finalized. No more signatures can be added." });
-        }
         const signatures = data.signatures || {};
         signatures[index] = signature;
-        await saveData({ signatures });
+        await saveData({ signatures, submitted: false });
         res.json({ success: true, signatures });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
-
-app.post('/api/submit', async (req, res) => {
+app.post('/api/save-signature', async (req, res) => {
+    const { index, signature } = req.body;
     try {
-        // submit பண்ணினாலும் server-ல் submitted save பண்ண வேண்டாம்
-        // Frontend மட்டும் finalize ஆகும், refresh பண்ணா fresh start
-        res.json({ success: true });
+        const data = await loadData();
+        const signatures = data.signatures || {};
+        signatures[index] = signature;
+        // submitted: false — always allow signing
+        await saveData({ signatures, submitted: false });
+        res.json({ success: true, signatures });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
