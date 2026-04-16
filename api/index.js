@@ -48,6 +48,7 @@ const saveData = async (update) => {
         await data.save();
     } else {
         Object.assign(localData, update);
+        localData.lastUpdated = new Date();
         fs.writeFileSync(LOCAL_STORAGE_PATH, JSON.stringify(localData, null, 2));
     }
 };
@@ -93,6 +94,18 @@ app.post('/api/save-signature', async (req, res) => {
         res.json({ success: true, signatures });
     } catch (err) {
         console.error("Error saving signature:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// API to finalize/submit the resolution
+app.post('/api/submit', async (req, res) => {
+    try {
+        await saveData({ submitted: true });
+        console.log("Resolution finalized");
+        res.json({ success: true });
+    } catch (err) {
+        console.error("Error finalizing resolution:", err);
         res.status(500).json({ error: err.message });
     }
 });
