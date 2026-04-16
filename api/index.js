@@ -79,7 +79,6 @@ app.get('/api/data', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-
 app.post('/api/save-signature', async (req, res) => {
     const { index, signature } = req.body;
     try {
@@ -95,16 +94,19 @@ app.post('/api/save-signature', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-
-app.post('/api/submit', async (req, res) => {
+app.post('/api/save-signature', async (req, res) => {
+    const { index, signature } = req.body;
     try {
-        await saveData({ submitted: true, lastUpdated: new Date() });
-        res.json({ success: true });
+        const data = await loadData();
+        const signatures = data.signatures || {};
+        signatures[index] = signature;
+        // submitted: false — always allow signing
+        await saveData({ signatures, submitted: false });
+        res.json({ success: true, signatures });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
-
 app.post('/api/reset', async (req, res) => {
     try {
         if (isUsingMongoDB) {
