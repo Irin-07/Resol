@@ -929,44 +929,29 @@
     }
 
   async function savePad(i) {
-    const cv = document.getElementById('cv' + i);
-    
-    // Check if canvas is blank
-    const ctx = cv.getContext('2d');
-    const pixelData = ctx.getImageData(0, 0, cv.width, cv.height).data;
-    let isBlank = true;
-    for (let p = 3; p < pixelData.length; p += 4) {
-      if (pixelData[p] > 0) { isBlank = false; break; }
-    }
+  const cv = document.getElementById('cv' + i);
+  const data = cv.toDataURL('image/png');
 
-    const data = isBlank ? null : cv.toDataURL('image/png');
+  // உடனே UI-ல sign காட்டு
+  signatures[i] = data;
+  const sc = document.getElementById('sc' + i);
+  sc.innerHTML = `
+    <img src="${data}" class="sig-img" style="display:block;max-height:48px;max-width:100%;">
+    <span class="sig-edit-hint">✏️ edit</span>`;
+  sc.classList.add('signed');
+  closePad(i);
 
-    // Update UI immediately
-    const sc = document.getElementById('sc' + i);
-    if (!data) {
-      delete signatures[i];
-      sc.innerHTML = `<span class="sig-ph">Click to sign</span><span class="sig-edit-hint">✏️</span>`;
-      sc.classList.remove('signed');
-    } else {
-      signatures[i] = data;
-      sc.innerHTML = `
-        <img src="${data}" class="sig-img" style="display:block;max-height:48px;max-width:100%;">
-        <span class="sig-edit-hint">✏️ edit</span>`;
-      sc.classList.add('signed');
-    }
-    closePad(i);
-
-    // Sync with server
-    try {
-      await fetch('/api/save-signature', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ index: i, signature: data })
-      });
-    } catch (err) {
-      console.error("Server sync failed:", err);
-    }
+  // Background-ல server-க்கு save — error வந்தாலும் student-க்கு தெரியாது
+  try {
+    await fetch('/api/save-signature', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ index: i, signature: data })
+    });
+  } catch (err) {
+    console.error("Server sync failed:", err);
   }
+}
 async function submitResolution() {
   if (activeIdx !== null) closePad(activeIdx);
 
