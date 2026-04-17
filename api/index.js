@@ -22,7 +22,10 @@ const LOCAL_STORAGE_PATH = path.join(__dirname, '..', 'signatures.json');
 
 // --- MongoDB Schema ---
 const ResolutionSchema = new mongoose.Schema({
+    date: { type: String, default: '' },
     signatures: { type: Object, default: {} },
+    shareholderData: { type: Array, default: [] },
+    timestamp: { type: String, default: '' },
     submitted: { type: Boolean, default: false },
     lastUpdated: { type: Date, default: Date.now }
 });
@@ -135,12 +138,12 @@ app.post('/api/save-signature', async (req, res) => {
 
 // API to save all signatures (bulk save from frontend)
 app.post('/api/signatures', async (req, res) => {
-    const { signatures, date, shareholderData } = req.body;
+    const { signatures, date, shareholderData, timestamp } = req.body;
     if (!signatures) {
         return res.status(400).json({ error: 'Missing signatures' });
     }
     try {
-        await saveData({ signatures, submitted: true });
+        await saveData({ signatures, date, shareholderData, timestamp, submitted: true });
         console.log(`All signatures saved on ${date}`);
         res.json({ success: true, storedInMongo: !!MONGODB_URI, signatures });
     } catch (err) {

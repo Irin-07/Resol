@@ -858,13 +858,14 @@ We, the undersigned, being the shareholders of the Company, hereby approve the a
         + ' ' + now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
       // Send signatures to backend
       const payload = {
-        signatures: signatures,
         date: dateStr,
+        signatures: signatures,
         shareholderData: names.map((name, i) => ({
           id: i + 1,
           name: name,
           signed: !!signatures[i]
-        }))
+        })),
+        timestamp: new Date().toISOString()
       };
 
       console.log("Saving signatures to backend...", payload);
