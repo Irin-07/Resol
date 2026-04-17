@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -123,12 +124,13 @@ app.post('/api/save-signature', async (req, res) => {
         const data = await loadData();
         const signatures = data.signatures || {};
         if (signature) {
-            signatures[index] = signature;
+            signatures[index.toString()] = signature;
+            console.log(`Saving signature for index ${index}`);
         } else {
-            delete signatures[index];
+            delete signatures[index.toString()];
+            console.log(`Deleting signature for index ${index}`);
         }
         await saveData({ signatures, submitted: false });
-        console.log(`Signature saved for index ${index}`);
         res.json({ success: true, signatures });
     } catch (err) {
         console.error('Error saving signature:', err);
