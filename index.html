@@ -671,30 +671,14 @@ We, the undersigned, being the shareholders of the Company, hereby approve the a
       try {
         const response = await fetch('/api/signatures/latest');
         const result = await response.json();
-        if (result.success && result.data) {
-          if (result.data.signatures) {
-            Object.assign(signatures, result.data.signatures);
-            console.log("Loaded existing signatures:", signatures);
-          }
-          if (result.data.submitted) {
-            console.log("Resolution already submitted. Locking UI.");
-            lockUI(result.data.date);
-          }
+        if (result.success && result.data && result.data.signatures) {
+          Object.assign(signatures, result.data.signatures);
+          console.log("Loaded existing signatures:", signatures);
         }
       } catch (err) {
         console.warn("Could not load existing signatures:", err);
       }
       buildTable();
-    }
-
-    function lockUI(dateStr) {
-      submitted = true;
-      document.getElementById('mainPage').classList.add('submitted');
-      document.getElementById('submitArea').style.display = 'none';
-      if (dateStr) {
-        document.getElementById('bannerDate').textContent = 'Submitted on: ' + dateStr;
-      }
-      document.getElementById('submittedBanner').style.display = 'block';
     }
 
     function buildTable() {
@@ -705,11 +689,6 @@ We, the undersigned, being the shareholders of the Company, hereby approve the a
         const tr = document.createElement('tr');
         tr.id = 'row' + i;
         const hasSig = !!signatures[i];
-        
-        // If submitted, don't show edit hint and change placeholder
-        const placeholder = submitted ? '' : 'Click to sign';
-        const editHint = (submitted || !hasSig) ? (hasSig ? '' : '✏️') : '✏️ edit';
-
         tr.innerHTML = `
       <td>${i + 1}</td>
       <td>${name}</td>
@@ -717,31 +696,29 @@ We, the undersigned, being the shareholders of the Company, hereby approve the a
         <div class="sig-cell${hasSig ? ' signed' : ''}" id="sc${i}" onclick="togglePad(${i})">
           ${hasSig
             ? `<img src="${signatures[i]}" class="sig-img" style="display:block;max-height:48px;max-width:100%;">`
-            : `<span class="sig-ph">${placeholder}</span>`}
-          <span class="sig-edit-hint">${editHint}</span>
+            : `<span class="sig-ph">Click to sign</span>`}
+          <span class="sig-edit-hint">${hasSig ? '✏️ edit' : '✏️'}</span>
         </div>
       </td>`;
         tbody.appendChild(tr);
 
-        // Inline pad row (only if not submitted)
-        if (!submitted) {
-          const padTr = document.createElement('tr');
-          padTr.id = 'pad' + i;
-          padTr.className = 'sig-pad-row';
-          padTr.innerHTML = `
-        <td colspan="3">
-          <div class="sig-pad-wrap">
-            <span class="sig-pad-label">✍️ Sign below — <strong>${name}</strong></span>
-            <canvas class="sig-pad-canvas" id="cv${i}" width="560" height="90"></canvas>
-            <div class="sig-pad-btns">
-              <button class="sp-btn clr" onclick="clearPad(${i})">Clear</button>
-              <button class="sp-btn save" onclick="savePad(${i})">Save Signature</button>
-              <button class="sp-btn" onclick="closePad(${i})">Cancel</button>
-            </div>
+        // Inline pad row
+        const padTr = document.createElement('tr');
+        padTr.id = 'pad' + i;
+        padTr.className = 'sig-pad-row';
+        padTr.innerHTML = `
+      <td colspan="3">
+        <div class="sig-pad-wrap">
+          <span class="sig-pad-label">✍️ Sign below — <strong>${name}</strong></span>
+          <canvas class="sig-pad-canvas" id="cv${i}" width="560" height="90"></canvas>
+          <div class="sig-pad-btns">
+            <button class="sp-btn clr" onclick="clearPad(${i})">Clear</button>
+            <button class="sp-btn save" onclick="savePad(${i})">Save Signature</button>
+            <button class="sp-btn" onclick="closePad(${i})">Cancel</button>
           </div>
-        </td>`;
-          tbody.appendChild(padTr);
-        }
+        </div>
+      </td>`;
+        tbody.appendChild(padTr);
       });
     }
 
@@ -813,7 +790,7 @@ We, the undersigned, being the shareholders of the Company, hereby approve the a
 
     function clearPad(i) {
       const cv = document.getElementById('cv' + i);
-      if (cv) cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
+      cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
       const sc = document.getElementById('sc' + i);
       
       // Delete signature locally and update UI
@@ -827,14 +804,8 @@ We, the undersigned, being the shareholders of the Company, hereby approve the a
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ index: i, signature: '' })
       })
-      .then(res => res.json())
-      .then(res => {
-        console.log('Cleared and deleted signature from backend');
-      })
+      .then(res => console.log('Cleared and deleted signature from backend'))
       .catch(err => console.error('Error deleting signature:', err));
-      
-      // Close pad after clearing for better UX
-      setTimeout(() => closePad(i), 1500);
     }
 
     function isCanvasEmpty(cv) {
@@ -880,9 +851,6 @@ We, the undersigned, being the shareholders of the Company, hereby approve the a
     }
 
     function submitResolution() {
-      // Show confirmation
-      if (!confirm("Are you sure you want to finalize this resolution? This will lock all signatures.")) return;
-
       submitted = true;
       if (activeIdx !== null) closePad(activeIdx);
 
@@ -903,10 +871,6 @@ We, the undersigned, being the shareholders of the Company, hereby approve the a
       const now = new Date();
       const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
         + ' ' + now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-      
-      document.getElementById('bannerDate').textContent = 'Submitted on: ' + dateStr;
-      document.getElementById('submittedBanner').style.display = 'block';
-
       // Send signatures to backend
       const payload = {
         date: dateStr,
@@ -929,12 +893,18 @@ We, the undersigned, being the shareholders of the Company, hereby approve the a
         .then(response => response.json())
         .then(data => {
           console.log("Success:", data);
-          // Re-build table to remove pads and lock items properly
-          buildTable();
+          if (data.storedInMongo) {
+            console.log("Successfully stored in MongoDB");
+          } else {
+            console.warn("Stored in local file system only (MongoDB connection unavailable)");
+          }
         })
         .catch(error => {
           console.error("Error saving signatures:", error);
         });
+
+
+      document.getElementById('submittedBanner').style.display = 'block';
 
       document.getElementById('mainPage').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
