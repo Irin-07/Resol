@@ -113,13 +113,17 @@ app.get('/api/signatures/latest', async (req, res) => {
 // API to save an individual signature
 app.post('/api/save-signature', async (req, res) => {
     const { index, signature } = req.body;
-    if (index === undefined || !signature) {
-        return res.status(400).json({ error: 'Missing index or signature' });
+    if (index === undefined) {
+        return res.status(400).json({ error: 'Missing index' });
     }
     try {
         const data = await loadData();
         const signatures = data.signatures || {};
-        signatures[index] = signature;
+        if (signature) {
+            signatures[index] = signature;
+        } else {
+            delete signatures[index];
+        }
         await saveData({ signatures, submitted: false });
         console.log(`Signature saved for index ${index}`);
         res.json({ success: true, signatures });

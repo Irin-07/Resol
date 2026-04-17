@@ -805,6 +805,7 @@ We, the undersigned, being the shareholders of the Company, hereby approve the a
     function savePad(i) {
       const cv = document.getElementById('cv' + i);
       const sc = document.getElementById('sc' + i);
+      let payloadSignature = '';
       
       if (isCanvasEmpty(cv)) {
         // If empty, delete the signature
@@ -815,12 +816,23 @@ We, the undersigned, being the shareholders of the Company, hereby approve the a
         // If has drawing, save it
         const data = cv.toDataURL('image/png');
         signatures[i] = data;
+        payloadSignature = data;
         sc.innerHTML = `
           <img src="${data}" class="sig-img" style="display:block;max-height:48px;max-width:100%;">
           <span class="sig-edit-hint">✏️ edit</span>`;
         sc.classList.add('signed');
       }
       closePad(i);
+
+      // Auto-save the individual signature to backend
+      fetch('/api/save-signature', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ index: i, signature: payloadSignature })
+      })
+      .then(res => res.json())
+      .then(res => console.log('Auto-saved signature:', res))
+      .catch(err => console.error('Error auto-saving signature:', err));
     }
 
     function submitResolution() {
