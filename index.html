@@ -791,6 +791,21 @@ We, the undersigned, being the shareholders of the Company, hereby approve the a
     function clearPad(i) {
       const cv = document.getElementById('cv' + i);
       cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
+      const sc = document.getElementById('sc' + i);
+      
+      // Delete signature locally and update UI
+      delete signatures[i];
+      sc.innerHTML = `<span class="sig-ph">Click to sign</span><span class="sig-edit-hint">✏️</span>`;
+      sc.classList.remove('signed');
+
+      // Delete from backend immediately
+      fetch('/api/save-signature', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ index: i, signature: '' })
+      })
+      .then(res => console.log('Cleared and deleted signature from backend'))
+      .catch(err => console.error('Error deleting signature:', err));
     }
 
     function isCanvasEmpty(cv) {
